@@ -1,0 +1,12 @@
+sun 0 1392700 1.989E30
+mercury 0.4 2439.7 3.285E23
+venus 0.7 6051.8 4.867E24
+earth 1 6731 5.972E24
+mars 1.5 3389.5 6.39E23
+# asteroid-belt 2-4.5
+jupiter 5.2 69911 1.898E27
+saturn 9.5 58232 5.683E26
+uranus 19.2 25362 8.681E25
+neptune 30.1 24622 1.024E26
+pluto 39.5 1188,3 1.303E22
+# kuiper-belt 30-50
