@@ -188,13 +188,13 @@ class gravity:
                 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_w:
-                        self.y -= self.MOVEMENT
-                    elif event.key == pygame.K_s:
                         self.y += self.MOVEMENT
+                    elif event.key == pygame.K_s:
+                        self.y -= self.MOVEMENT
                     elif event.key == pygame.K_a:
-                        self.x -= self.MOVEMENT
-                    elif event.key == pygame.K_d:
                         self.x += self.MOVEMENT
+                    elif event.key == pygame.K_d:
+                        self.x -= self.MOVEMENT
                     elif event.key == pygame.K_p:
                         self.MOVEMENT += 10
                     elif event.key == pygame.K_l:
