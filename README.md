@@ -61,5 +61,5 @@ Rocket Force:
 
 ## Link
 
-https://mrmineev.github.io/articles/gravity-simulator.html
+https://mrmineev.github.io/articles/gravity-simulator/gravity-simulator
 
