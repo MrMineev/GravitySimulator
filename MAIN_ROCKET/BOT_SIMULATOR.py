@@ -2,7 +2,9 @@ import pygame
 import sys
 from operations import operations
 import math
-import numpy
+import numpy as np
+from feature import Feature
+from Body import Body
 
 oper = operations()
 
@@ -17,7 +19,7 @@ LINE_SCALE = 10
 
 RADIUS_SCALE = 500
 
-class gravity:
+class BOT_SIMULATOR:
 
     START = 0
 
@@ -41,7 +43,7 @@ class gravity:
         print('Step #{}'.format(step))
         for body in bodies:
             s = '{:<8}  Pos.={:>6.2f} {:>6.2f} Vel.={:>10.3f} {:>10.3f}'.format(
-                body.name, body.px/AU, body.py/AU, body.vx, body.vy)
+                body.name, body.px, body.py, body.vx, body.vy)
             print(s)
         print()
 
@@ -53,7 +55,7 @@ class gravity:
         return False
 
 
-    def loop(self, bodies, main=None, plot=None, rocket=None):
+    def loop(self, bodies, main=None, plot=None, rocket=None, plot_actions=None):
         """([Body])
 
         Never returns; loops through the simulation, updating the
@@ -88,6 +90,8 @@ class gravity:
 
             print(f"x => {self.x}, y = {self.y}")
             print(f"SCALE => {self.SCALE}")
+
+            #print(f'direction x=>{bodies[rocket].direction[0]}, y=>{bodies[rocket].direction[1]}')
             print(f'timestep => {self.timestep}')
             print(f"dist => {oper.magnitude(oper.minus([body.px, body.py], [bodies[main].px, bodies[main].py]))}")
             print(f"velocity of rocket vx => {body.vx}, vy => {body.vy}")
@@ -96,6 +100,20 @@ class gravity:
             clock.tick(60)
 
             screen.fill(background)
+
+            feature_s = Feature()
+            features = feature_s.loop(
+                bodies,
+                main=main,
+                rocket=rocket
+            )
+            for fe in features:
+                x, y = fe
+                feature = Body()
+                feature.px = x
+                feature.py = y
+                location = (300 + (bodies[main].px - feature.px) * self.SCALE + self.x, 300 + (bodies[main].py - feature.py) * self.SCALE + self.y)
+                pygame.draw.circle(screen, feature.color, location, 5, 20)  
 
             self.update_info(step, bodies)
 
@@ -112,23 +130,44 @@ class gravity:
                     fx, fy = body.attraction(other)
                     total_fx += fx
                     total_fy += fy
+
+                # Record the total force exerted.
                 force[body] = (total_fx, total_fy)
+
+            # Update velocities based upon on the force.
             for body in bodies:
+
+                #check = self.check_existance(constant, body.name)
+
+                #if check == True:
+                #    continue
+
                 fx, fy = force[body]
                 body.vx += fx / body.mass * self.timestep
                 body.vy += fy / body.mass * self.timestep
 
+                # Update positions
                 body.px += body.vx * self.timestep
                 body.py += body.vy * self.timestep
+                #body.goto(body.px*SCALE, body.py*SCALE)
+                #body.dot(3)
 
                 if plot != None and plot == body.name:
                     with open('planet_orbit.txt', 'a') as f:
                         f.write(str(body.px) + " " + str(body.py) + "\n")
                         print("inserted !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                     f.close()
+                #if body.name == 'Moon':
+                #    with open('data_moon.txt', 'a') as f:
+                #        f.write(str(body.px) + " " + str(body.py) + "\n")
+
+                #print(f"res => {body.radius * self.SCALE}")
+
                 if main == None:
                     pygame.draw.circle(screen, body.color, (300 + body.px*self.SCALE, 300 + body.py*self.SCALE), body.radius / RADIUS_SCALE, 20)  
                 if body.name == 'Rocket':
+                    #print(f"previus position x => {body.prx}, y => {body.pry}")
+
                     if (oper.magnitude(oper.minus([body.px, body.py], [bodies[main].px, bodies[main].py]))) <= bodies[main].radius - 1:
                         position = oper.minus([body.px, body.py], [bodies[main].px, bodies[main].py])
                         mag = oper.magnitude(position)
@@ -136,12 +175,19 @@ class gravity:
                         result_vec = oper.plus(oper.multi(unit_vec, bodies[main].radius), [bodies[main].px, bodies[main].py])
 
 
+                        #print(f"new_dist => {oper.magnitude(oper.minus([body.px, body.py], [bodies[main].px, bodies[main].py]))}")
+
                         body.px = result_vec[0]
                         body.py = result_vec[1]
 
                         body.vx = 0
                         body.vy = 0
 
+                        #print(f"velocity QWERTY x={body.vx}, y={body.vy}")
+                    
+                    #pygame.draw.polygon(screen, body.color, ((body.px, body.py), (body.px - body.radius,body.py - body.radius), (body.px + body.radius,body.py - body.radius)))
+
+                    #pygame.draw.circle(screen, body.color, (300 + (bodies[main].px - body.px) * self.SCALE + self.x, 300 + (bodies[main].py - body.py) * self.SCALE + self.y), body.radius, 20)
                     pygame.draw.line(screen, body.color, (300 + (bodies[main].px - body.px) * self.SCALE + self.x, 300 + (bodies[main].py - body.py) * self.SCALE + self.y), (300 + (bodies[main].px - body.px) * self.SCALE + self.x + body.direction[0] * LINE_SCALE, 300 + (bodies[main].py - body.py) * self.SCALE + self.y + body.direction[1] * LINE_SCALE), 5)
                     
                 else:
@@ -151,6 +197,10 @@ class gravity:
                         pygame.draw.circle(screen, body.color, (300 + (bodies[main].px - body.px) * self.SCALE + self.x, 300 + (bodies[main].py - body.py) * self.SCALE + self.y), body.radius / RADIUS_SCALE, 20)                
 
                 #answer.append([body.px * SCALE, body.py * SCALE])
+
+            input_layer = [bodies[rocket].px, bodies[rocket].py, bodies[rocket].vx, bodies[rocket].vy, self.angle, self.START]
+
+            action = -1 # no actions
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -158,13 +208,13 @@ class gravity:
                 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_w:
-                        self.y += self.MOVEMENT
-                    elif event.key == pygame.K_s:
                         self.y -= self.MOVEMENT
+                    elif event.key == pygame.K_s:
+                        self.y += self.MOVEMENT
                     elif event.key == pygame.K_a:
-                        self.x += self.MOVEMENT
-                    elif event.key == pygame.K_d:
                         self.x -= self.MOVEMENT
+                    elif event.key == pygame.K_d:
+                        self.x += self.MOVEMENT
                     elif event.key == pygame.K_p:
                         self.MOVEMENT += 10
                     elif event.key == pygame.K_l:
@@ -183,21 +233,32 @@ class gravity:
                         self.timestep /= 2
                     elif event.key == pygame.K_i:
                         self.START = 1
+
+                        action = 1 # launch
                     elif event.key == pygame.K_j:
                         self.START = 0
+
+                        action = 2 # stop launch
                     elif event.key == pygame.K_9:
                         self.angle += 5
+
+                        action = 3 # turning
                     elif event.key == pygame.K_0:
                         self.angle -= 5
+
+                        action = 4 # turning
                     elif event.key == pygame.K_1:
                         bodies[rocket].thrust -= 100
                     elif event.key == pygame.K_2:
                         bodies[rocket].thrust += 100
-            
+                    
             bodies[rocket].direction[0] = math.cos(self.angle * math.pi / 180)
             bodies[rocket].direction[1] = math.sin(self.angle * math.pi / 180)
 
             if self.START == 1:
+                #velocity = (bodies[rocket].fuel_velocity * bodies[rocket].fuel_mass * self.timestep) / bodies[rocket].mass
+                #bodies[rocket].mass -= bodies[rocket].fuel_mass * self.timestep
+                #res = oper.multi(bodies[rocket].direction, velocity)
                 velocity = (bodies[rocket].thrust * self.timestep) / bodies[rocket].mass * self.timestep
                 res = oper.multi(bodies[rocket].direction, velocity)
 
@@ -207,3 +268,4 @@ class gravity:
                 print("FAST!!!!")
             
             pygame.display.update()
+
