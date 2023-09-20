@@ -24,7 +24,7 @@ class Feature:
     MOVEMENT = 10
     ZOOMING = 10000
 
-    FEATURE = 30000
+    FEATURE = 1000
 
     START = 0
 

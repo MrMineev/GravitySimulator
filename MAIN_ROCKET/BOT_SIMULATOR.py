@@ -19,6 +19,8 @@ LINE_SCALE = 10
 
 RADIUS_SCALE = 500
 
+FONT_SIZE = 20
+
 class BOT_SIMULATOR:
 
     START = 0
@@ -54,6 +56,10 @@ class BOT_SIMULATOR:
                 return True
         return False
 
+    def get_text(self, stats):
+        font = pygame.font.Font(None, FONT_SIZE)  # You can change the font and size as needed
+        text = font.render(stats, True, (255, 255, 255))
+        return text
 
     def loop(self, bodies, main=None, plot=None, rocket=None, plot_actions=None):
         """([Body])
@@ -100,6 +106,14 @@ class BOT_SIMULATOR:
             clock.tick(60)
 
             screen.fill(background)
+
+            texts = [
+                f"Timestep = {self.timestep}",
+                f"Distance = {oper.magnitude(oper.minus([body.px, body.py], [bodies[main].px, bodies[main].py]))}",
+                f"Mass of Rocket = {bodies[rocket].mass}"
+            ]
+            for i in range(len(texts)):
+                screen.blit(self.get_text(texts[i]), (10, FONT_SIZE * (i + 1)))
 
             feature_s = Feature()
             features = feature_s.loop(
