@@ -107,10 +107,14 @@ class BOT_SIMULATOR:
 
             screen.fill(background)
 
+            velocity_x = "{:.2f}".format(body.vx)
+            velocity_y = "{:.2f}".format(body.vy)
+
             texts = [
                 f"Timestep = {self.timestep}",
                 f"Distance = {oper.magnitude(oper.minus([body.px, body.py], [bodies[main].px, bodies[main].py]))}",
-                f"Mass of Rocket = {bodies[rocket].mass}"
+                f"Mass of Rocket = {bodies[rocket].mass}",
+                f"Velocity = [{velocity_x}, {velocity_y}]"
             ]
             for i in range(len(texts)):
                 screen.blit(self.get_text(texts[i]), (10, FONT_SIZE * (i + 1)))
