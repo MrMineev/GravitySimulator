@@ -109,13 +109,25 @@ class BOT_SIMULATOR:
 
             velocity_x = "{:.2f}".format(body.vx)
             velocity_y = "{:.2f}".format(body.vy)
+            distance = oper.magnitude(oper.minus([body.px, body.py], [bodies[main].px, bodies[main].py]))
+            velocity_mag = oper.magnitude([body.vx, body.vy])
+            mass = bodies[rocket].mass
+            kinetic_energy = mass * (velocity_mag ** 2) / 2
+            potential_energy = -G * (bodies[rocket].mass * bodies[main].mass) / distance
+            energy = kinetic_energy + potential_energy
 
             texts = [
                 f"Timestep = {self.timestep}",
-                f"Distance = {oper.magnitude(oper.minus([body.px, body.py], [bodies[main].px, bodies[main].py]))}",
+                f"Distance = {distance}",
                 f"Mass of Rocket = {bodies[rocket].mass}",
-                f"Velocity = [{velocity_x}, {velocity_y}]"
+                f"Velocity = [{velocity_x}, {velocity_y}]",
+                f"== ENERGY START ==",
+                f"  Kinetic = {kinetic_energy}",
+                f"  Potential = {potential_energy}",
+                f"  Total = {energy}",
+                f"== ENERGY END =="
             ]
+
             for i in range(len(texts)):
                 screen.blit(self.get_text(texts[i]), (10, FONT_SIZE * (i + 1)))
 
